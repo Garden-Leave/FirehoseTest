@@ -2,7 +2,7 @@ import json
 from flask import Flask, request
 
 # Creates and names a new Flask app / web server
-app = Flask(__name__)
+app = Flask('auto_refresh')
 
 
 ###
@@ -14,6 +14,7 @@ airPressure = 'unknown'
 co2PPM = 'unknown'
 humidity = 'unknown'
 battery = 'unknown'
+
 
 @app.route('/', methods=['GET', 'POST'])
 # default routing (whenever someone navigates to / run main page); accepts both GET and POST methods
@@ -60,10 +61,11 @@ def main_page():
         data = data.decode("utf-8")
         data = json.loads(data)
         print (data)
-        result = Update(data)
+        result = update_data(data)
         return result
 
-def Update(data):
+
+def update_data(data):
     global temperature
     global airPressure
     global co2PPM
@@ -93,4 +95,4 @@ def Update(data):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int("80"), debug=True)
+    app.run(host="0.0.0.0", port=int("5004"), debug=True)
