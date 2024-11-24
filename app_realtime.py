@@ -5,22 +5,24 @@ app = Flask('read_and_display')
 
 apiKey = '12D7272397E44873BF36A60DB4C0DF33'
 apiKey_eu = '300207A2FA4D459789D4737FB73BFE49'
-api_url = 'https://partners.dnaspaces.io/api/partners/v1/firehose/events'
+api_url_io = 'https://partners.dnaspaces.io/api/partners/v1/firehose/events'
+api_url_eu = 'https://partners.dnaspaces.eu/api/partners/v1/firehose/events'
 
 test_api_url = 'http://127.0.0.1:5002/stream_out'
 
 
-@app.route('/iot',endpoint='iot')
+@app.route('/',endpoint='iot')
 def main():
     # return Response(stream(),mimetype="text/event-stream")
     return Response(stream(), content_type='application/json')
 
 
 def stream():
-    session = requests.Session()
     # session.headers = {'X-API-Key': apiKey}
-    session.headers = {'X-API-Key': apiKey_eu}
-    with session.get(test_api_url, stream=True) as response:
+    headers = {'X-API-Key': apiKey_eu}
+
+    # with session.get(test_api_url, stream=True) as response:
+    with requests.get(api_url_eu, stream=True,headers=headers) as response:
         if response.status_code == 200:
             # 逐块读取响应内容并流式输出
             for line in response.iter_lines():
@@ -28,9 +30,10 @@ def stream():
                     decoded_line = line.decode('utf-8')
                     # print(decoded_line)
                     event = json.loads(decoded_line)
+                    # print(event)
                     eventType = event['eventType']
+                    print(eventType)
                     if eventType == "IOT_TELEMETRY":
-                        # print(event)
                         try:
                             ble_info = {}
                             ble_info['device_mac'] = event['iotTelemetry']['deviceInfo']['deviceMacAddress']
@@ -63,9 +66,13 @@ def stream():
                             continue  # Skip this event and continue
                         except Exception:
                             continue
+                    else:
+                        yield json.dumps(event).encode('utf-8') + b'\n\n'
         else:
+            print('request failed not 200')
             yield f"Error: {response.status_code}"
 
 
 if __name__ == '__main__':
+    # stream()
     app.run(port=5012)
