@@ -42,21 +42,21 @@ def stream():
                             ibeacon_flag= event['iotTelemetry']['iBeacon']
                         except KeyError as e:
                             print(f"ibeacon filed not existing: {e}")
-                            ble_info['brand']='BLE device but not iBeacon'
+                            ble_info['brand']='IoT event but not iBeacon'
                         except json.JSONDecodeError as e:
                             print(f"Error decoding JSON: {e}")
                         except Exception:
                             print("Unknown exception occurred")
                         else:
                             print(event)
-                            if event['iotTelemetry']['iBeacon']['uuid'] == "fda50693-a4e2-4fb1-afcf-c6eb07647825":
+                            if event['iotTelemetry']['iBeacon']['uuid'] == "fda50693a4e24fb1afcfc6eb07647825":
                                 ble_info['ibeacon_uuid'] = event['iotTelemetry']['iBeacon']['uuid']
                                 ble_info['ibeacon_mac'] = event['iotTelemetry']['iBeacon']['beaconMacAddress']
                                 ble_info['ibeacon_major'] = event['iotTelemetry']['iBeacon']['major']
                                 ble_info['ibeacon_minor'] = event['iotTelemetry']['iBeacon']['minor']
                                 ble_info['brand'] = 'Sensetime Beacon'
                             else:
-                                ble_info['brand'] = 'iBeacon device but other brand'
+                                ble_info['brand'] = 'iBeacon device but not Sensetime'
                             # print('''sensetime ble tag found, uuid: {} mac: {} major: {} minor: {}'''
                             #       .format(ble_info['ibeacon_uuid'], ble_info['ibeacon_mac'],
                             #               ble_info['ibeacon_major'], ble_info['ibeacon_minor']))
