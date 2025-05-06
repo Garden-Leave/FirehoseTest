@@ -1,9 +1,8 @@
 import json
 from flask import Flask, request
 
-# Creates and names a new Flask app / web server
+# 全局变量 + html网页每5s自动刷新的方式
 app = Flask('auto_refresh')
-
 
 ###
 # Defining the default value of the telemetry variable until they are overwritten by incoming information.

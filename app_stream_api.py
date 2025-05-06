@@ -1,7 +1,9 @@
 from flask import  Flask,render_template,session,Response
 import requests,json
 from datetime import datetime,timedelta
-from zoneinfo import ZoneInfo
+
+
+# flask 原生http stream方式 输出从firehose提取的数据
 app = Flask('read_and_display')
 
 apiKey = '12D7272397E44873BF36A60DB4C0DF33'
@@ -9,8 +11,8 @@ apiKey_eu = '300207A2FA4D459789D4737FB73BFE49'
 api_url_io = 'https://partners.dnaspaces.io/api/partners/v1/firehose/events'
 api_url_eu = 'https://partners.dnaspaces.eu/api/partners/v1/firehose/events'
 test_api_url = 'http://127.0.0.1:5002/stream_out'
-
 stuuid = 'fda50693a4e24fb1afcfc6eb07647825'
+
 
 @app.route('/',endpoint='iot')
 def main():
@@ -21,7 +23,6 @@ def main():
 def stream():
     # session.headers = {'X-API-Key': apiKey}
     headers = {'X-API-Key': apiKey_eu}
-
     # with session.get(test_api_url, stream=True) as response:
     with requests.get(api_url_eu, stream=True,headers=headers) as response:
         if response.status_code == 200:
@@ -72,7 +73,7 @@ def stream():
                                 info1['last_seen'] = str(last_time)
                                 info1['rssi'] = event['iotTelemetry']['maxDetectedRssi']
                                 # if  major == '20103' and ['minor'] in ['22613','23415']:
-                                if major == 20103 and minor == 21988:
+                                if major == 20103:
                                 # ble_info['ibeacon_uuid'] = event['iotTelemetry']['iBeacon']['uuid']
                                 # ble_info['ibeacon_mac'] = event['iotTelemetry']['iBeacon']['beaconMacAddress']
                                 # ble_info['ibeacon_major'] = event['iotTelemetry']['iBeacon']['major']
@@ -86,9 +87,9 @@ def stream():
                                     except TypeError as e:
                                         print(e)
                                 else:
-                                    yield "-"
+                                    yield " "
                             else:
-                                yield "*"
+                                yield ""
                             # else:
                             #     ble_info['brand'] = 'iBeacon device but not Sensetime'
                             # print('''sensetime ble tag found, uuid: {} mac: {} major: {} minor: {}'''
@@ -118,7 +119,7 @@ def stream():
                         # yield resp + b'\n'
                     else:
                         # yield json.dumps(event).encode('utf-8') + b'\n\n'
-                        yield "+"# 非IOT 什么也不输出
+                        yield " "# 非IOT 什么也不输出
         else:
             print('request failed')
             yield f"Error: {response.status_code}"

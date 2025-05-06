@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BLE Tag Location</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body style="font-family: Arial; background: #f0f0f0; text-align:center; padding-top: 50px;">
+
+    <h2>ble tag location</h2>   <p>major: <span id="major">等待数据...</span></p>
+    <p>湿度: <span id="minor">等待数据...</span></p>
+    <p>x_location: <span id="x">等待数据...</span></p>
+    <p>y_location: <span id="y">等待数据...</span></p>
+
+    <script>
+        const socket = io();
+
+        socket.on('sensor_update', function(data) {
+            document.getElementById('major').textContent = data.major;
+            document.getElementById('minor').textContent = data.minor;
+            document.getElementById('x').textContent = data.x;
+            document.getElementById('y').textContent = data.y;
+        });
+    </script>
+</body>
+</html>
