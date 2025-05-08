@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,render_template
 from flask_socketio import SocketIO
 import time
 import json
@@ -13,7 +13,8 @@ api_url_eu = 'https://partners.dnaspaces.eu/api/partners/v1/firehose/events'
 apiKey_eu = '300207A2FA4D459789D4737FB73BFE49'
 stuuid = 'fda50693a4e24fb1afcfc6eb07647825'
 
-app = Flask(__name__)
+app = Flask('ble_ws',template_folder='.')
+
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
@@ -28,6 +29,7 @@ def data_stream():
 
 
 def stream_and_emit():
+    print('emit func running')
     headers = {'X-API-Key': apiKey_eu}
     with requests.get(api_url_eu, stream=True, verify=False,headers=headers) as resp:
         if resp.status_code == 200:
@@ -40,7 +42,7 @@ def stream_and_emit():
                         # print(event)
                         ble_info = {}
                         info1 = {}
-                        try:  # 判断BLE类型  是否ibeacon
+                        try:  # 判断BLE类型
                             ibeacon_flag = event['iotTelemetry']['iBeacon']
                         except KeyError as e:
                             print(f"ibeacon field not existing: {e}")
@@ -53,11 +55,14 @@ def stream_and_emit():
                             # print(event)
                             if event['iotTelemetry']['iBeacon']['uuid'] == stuuid:
                                 # major 20103  minor  21968
+                                # print(event)
                                 major = event['iotTelemetry']['iBeacon']['major']
                                 minor = event['iotTelemetry']['iBeacon']['minor']
                                 # print(major,minor)
                                 info1['x'] = event['iotTelemetry']['detectedPosition']['xPos']
                                 info1['y'] = event['iotTelemetry']['detectedPosition']['yPos']
+                                info1['location_id'] = event['iotTelemetry']['detectedPosition']['locationId']
+                                info1['floor_number'] = event['iotTelemetry']['location']['floorNumber']
                                 info1['uuid'] = stuuid
                                 info1['mac'] = event['iotTelemetry']['iBeacon']['beaconMacAddress']
                                 info1['major'] = str(major)
@@ -68,18 +73,18 @@ def stream_and_emit():
                                 delta = timedelta(hours=4)
                                 last_time = ts2 + delta
                                 info1['last_seen'] = str(last_time)
-                                info1['rssi'] = event['iotTelemetry']['maxDetectedRssi']
+                                info1['max_rssi'] = event['iotTelemetry']['maxDetectedRssi']
                                 # if  major == '20103' and ['minor'] in ['22613','23415']:
-                                if major == 20103:
+                                if major == 20103 and minor == 22613:
                                     try:
                                         print(info1)
-                                        yield json.dumps(info1).encode('utf-8') + b'\n\n'
+                                        socketio.emit('location_update',info1)
                                     except TypeError as e:
                                         print(e)
                                 else:
-                                    yield " "
+                                    pass
                             else:
-                                yield ""
+                                pass
                             # else:
                             #     ble_info['brand'] = 'iBeacon device but not Sensetime'
                             # print('''sensetime ble tag found, uuid: {} mac: {} major: {} minor: {}'''
@@ -88,15 +93,15 @@ def stream_and_emit():
                         finally:
                             pass
                     else:
-                        yield " "  # 非IOT 什么也不输出
+                        pass
             else:
                 print('cisco request failed')
-                yield f"Error: {resp.status_code}"
+                # yield f"Error: {resp.status_code}"
 
 
 @app.route('/')
 def index():
-    return "WebSocket backend is running"
+    return render_template('ws_page.html')
 
 
 @socketio.on('connect')
@@ -106,5 +111,5 @@ def on_connect():
 
 
 if __name__ == '__main__':
-    threading.Thread(target=data_stream).start()
-    socketio.run(app, host='0.0.0.0', port=5004)
+    threading.Thread(target=stream_and_emit).start()
+    socketio.run(app, host='0.0.0.0', port=5004,allow_unsafe_werkzeug=True)

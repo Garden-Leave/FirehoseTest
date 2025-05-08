@@ -5,20 +5,34 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
 <body style="font-family: Arial; background: #f0f0f0; text-align:center; padding-top: 50px;">
+    <div style="margin=0">
+    <h1>BLE Tag Location</h1>
+    <p>major: &nbsp;<span id="major" style="color:blue;font-size:20px">等待数据...</span></p>
+    <p>minor:&nbsp; <span id="minor" style="color:blue;font-size:20px">等待数据...</span></p>
+    <p>mac: &nbsp;<span id="mac" style="color:blue;font-size:20px">等待数据...</span></p>
+    <p>max_rssi: &nbsp;<span id="max_rssi" style="color:blue;font-size:20px">等待数据...</span></p>
+    <p>last_seen: &nbsp;<span id="last_seen" style="color:green;font-size:20px">等待数据...</span></p>
+    <p>floorNumber: &nbsp;<span id="floor_number" style="color:red;font-size:20px">等待数据...</span></p>
+    <p>locationID: &nbsp;<span id="location_id" style="color:red;font-size:20px">等待数据...</span></p>
+    <p>x_location:&nbsp; <span id="x" style="color:red;font-size:40px">等待数据...</span></p>
+    <p>y_location: &nbsp;<span id="y" style="color:red;font-size:40px">等待数据...</span></p>
+</div>
 
-    <h2>ble tag location</h2>   <p>major: <span id="major">等待数据...</span></p>
-    <p>湿度: <span id="minor">等待数据...</span></p>
-    <p>x_location: <span id="x">等待数据...</span></p>
-    <p>y_location: <span id="y">等待数据...</span></p>
+
 
     <script>
         const socket = io();
 
-        socket.on('sensor_update', function(data) {
+        socket.on('location_update', function(data) {
             document.getElementById('major').textContent = data.major;
             document.getElementById('minor').textContent = data.minor;
             document.getElementById('x').textContent = data.x;
             document.getElementById('y').textContent = data.y;
+            document.getElementById('last_seen').textContent = data.last_seen;
+            document.getElementById('mac').textContent = data.mac;
+            document.getElementById('location_id').textContent = data.location_id;
+            document.getElementById('max_rssi').textContent = data.max_rssi;
+            document.getElementById('floor_number').textContent = data.floor_number;
         });
     </script>
 </body>
